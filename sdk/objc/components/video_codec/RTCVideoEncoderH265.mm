@@ -11,6 +11,7 @@
 #import "RTCVideoEncoderH265.h"
 
 #import <VideoToolbox/VideoToolbox.h>
+#include <atomic>
 #include <vector>
 
 #if defined(WEBRTC_IOS)
@@ -284,12 +285,18 @@ bool HasHardwareEncoder() {
 }
 
 + (BOOL)isSupported {
-  static BOOL supported = NO;
-  static dispatch_once_t onceToken;
-  dispatch_once(&onceToken, ^{
-    supported = HasHardwareEncoder();
-  });
-  return supported;
+  // Only cache success: probing can fail transiently (e.g. while the app is
+  // in the background for an incoming call), and that must not disable H265
+  // for the rest of the process.
+  static std::atomic<bool> supported{false};
+  if (supported.load(std::memory_order_relaxed)) {
+    return YES;
+  }
+  if (!HasHardwareEncoder()) {
+    return NO;
+  }
+  supported.store(true, std::memory_order_relaxed);
+  return YES;
 }
 
 + (NSArray<RTC_OBJC_TYPE(RTCVideoCodecInfo) *> *)supportedCodecs {
