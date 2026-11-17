@@ -217,11 +217,14 @@ NSDictionary *EncoderSpecification() {
 // Returns true if `compressionSession` is backed by a hardware encoder.
 bool IsUsingHardwareEncoder(VTCompressionSessionRef compressionSession) {
   CFBooleanRef hwacclEnabled = nullptr;
-  OSStatus status = VTSessionCopyProperty(
-      compressionSession,
-      kVTCompressionPropertyKey_UsingHardwareAcceleratedVideoEncoder,
-      nullptr,
-      &hwacclEnabled);
+  OSStatus status = kVTPropertyNotSupportedErr;
+  if (@available(iOS 17.4, macCatalyst 17.4, *)) {
+    status = VTSessionCopyProperty(
+        compressionSession,
+        kVTCompressionPropertyKey_UsingHardwareAcceleratedVideoEncoder,
+        nullptr,
+        &hwacclEnabled);
+  }
   if (status != noErr || !hwacclEnabled) {
 #if defined(WEBRTC_IOS) && !TARGET_OS_SIMULATOR && !TARGET_OS_MACCATALYST
     // iOS devices only have hardware H265 encoders, so a session that doesn't

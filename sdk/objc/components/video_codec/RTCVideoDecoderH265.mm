@@ -307,11 +307,14 @@ void h265DecompressionOutputCallback(void *decoderRef,
 - (BOOL)isUsingHardwareDecoder {
   RTC_DCHECK(_decompressionSession);
   CFBooleanRef hwacclEnabled = nullptr;
-  OSStatus status = VTSessionCopyProperty(
-      _decompressionSession,
-      kVTDecompressionPropertyKey_UsingHardwareAcceleratedVideoDecoder,
-      nullptr,
-      &hwacclEnabled);
+  OSStatus status = kVTPropertyNotSupportedErr;
+  if (@available(iOS 17.0, macCatalyst 17.0, *)) {
+    status = VTSessionCopyProperty(
+        _decompressionSession,
+        kVTDecompressionPropertyKey_UsingHardwareAcceleratedVideoDecoder,
+        nullptr,
+        &hwacclEnabled);
+  }
   if (status != noErr || !hwacclEnabled) {
     // The session doesn't report how it decodes. Fall back to whether the
     // device can decode H265 in hardware at all.
