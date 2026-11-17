@@ -21,6 +21,11 @@
 #import "api/video_codec/RTCVideoDecoderAV1.h"  // nogncheck
 #endif
 
+#if defined(RTC_ENABLE_H265)
+#import "RTCH265ProfileLevelId.h"  // nogncheck
+#import "RTCVideoDecoderH265.h"  // nogncheck
+#endif
+
 @implementation RTC_OBJC_TYPE (RTCDefaultVideoDecoderFactory)
 
 - (NSArray<RTC_OBJC_TYPE(RTCVideoCodecInfo) *> *)supportedCodecs {
@@ -34,6 +39,12 @@
 
   [result
       addObjectsFromArray:[RTC_OBJC_TYPE(RTCVideoDecoderVP9) supportedCodecs]];
+
+#if defined(RTC_ENABLE_H265)
+  // Empty unless there is a hardware H265 decoder.
+  [result
+      addObjectsFromArray:[RTC_OBJC_TYPE(RTCVideoDecoderH265) supportedCodecs]];
+#endif
 
 #if defined(RTC_DAV1D_IN_INTERNAL_DECODER_FACTORY)
   [result
@@ -53,6 +64,13 @@
              [RTC_OBJC_TYPE(RTCVideoDecoderVP9) isSupported]) {
     return [RTC_OBJC_TYPE(RTCVideoDecoderVP9) vp9Decoder];
   }
+
+#if defined(RTC_ENABLE_H265)
+  if ([info.name isEqualToString:kRTCVideoCodecH265Name] &&
+      [RTC_OBJC_TYPE(RTCVideoDecoderH265) isSupported]) {
+    return [[RTC_OBJC_TYPE(RTCVideoDecoderH265) alloc] init];
+  }
+#endif
 
 #if defined(RTC_DAV1D_IN_INTERNAL_DECODER_FACTORY)
   if ([info.name isEqualToString:kRTCVideoCodecAv1Name]) {

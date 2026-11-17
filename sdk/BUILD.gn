@@ -730,6 +730,15 @@ if (is_ios || is_mac) {
           "objc/components/video_codec/UIDevice+H264Profile.mm",
         ]
       }
+      if (rtc_use_h265) {
+        sources += [
+          "objc/components/video_codec/RTCCodecSpecificInfoH265+Private.h",
+          "objc/components/video_codec/RTCCodecSpecificInfoH265.h",
+          "objc/components/video_codec/RTCCodecSpecificInfoH265.mm",
+          "objc/components/video_codec/RTCH265ProfileLevelId.h",
+          "objc/components/video_codec/RTCH265ProfileLevelId.mm",
+        ]
+      }
 
       public_configs = [ ":common_config_objc" ]
       deps = [
@@ -1427,6 +1436,14 @@ if (is_ios || is_mac) {
             "objc/api/peerconnection/RTCFileLogger.h",
           ]
         }
+        if (rtc_use_h265) {
+          common_objc_headers += [
+            "objc/components/video_codec/RTCCodecSpecificInfoH265.h",
+            "objc/components/video_codec/RTCH265ProfileLevelId.h",
+            "objc/components/video_codec/RTCVideoDecoderH265.h",
+            "objc/components/video_codec/RTCVideoEncoderH265.h",
+          ]
+        }
 
         sources = common_objc_headers
         public_headers = common_objc_headers
@@ -1574,6 +1591,14 @@ if (is_ios || is_mac) {
           sources += [
             "objc/api/logging/RTCCallbackLogger.h",
             "objc/api/peerconnection/RTCFileLogger.h",
+          ]
+        }
+        if (rtc_use_h265) {
+          sources += [
+            "objc/components/video_codec/RTCCodecSpecificInfoH265.h",
+            "objc/components/video_codec/RTCH265ProfileLevelId.h",
+            "objc/components/video_codec/RTCVideoDecoderH265.h",
+            "objc/components/video_codec/RTCVideoEncoderH265.h",
           ]
         }
 
@@ -1793,6 +1818,14 @@ if (is_ios || is_mac) {
         "objc/components/video_codec/RTCVideoEncoderH264.h",
         "objc/components/video_codec/RTCVideoEncoderH264.mm",
       ]
+      if (rtc_use_h265) {
+        sources += [
+          "objc/components/video_codec/RTCVideoDecoderH265.h",
+          "objc/components/video_codec/RTCVideoDecoderH265.mm",
+          "objc/components/video_codec/RTCVideoEncoderH265.h",
+          "objc/components/video_codec/RTCVideoEncoderH265.mm",
+        ]
+      }
 
       configs += [
         "..:common_objc",
@@ -1813,6 +1846,7 @@ if (is_ios || is_mac) {
         "../api/video:video_rtp_headers",
         "../api/video_codecs:video_codecs_api",
         "../common_video",
+        "../media:media_constants",
         "../modules/video_coding:video_codec_interface",
         "../rtc_base:buffer",
         "../rtc_base:checks",

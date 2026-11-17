@@ -26,6 +26,11 @@
 #import "api/video_codec/RTCVideoEncoderAV1.h"  // nogncheck
 #endif
 
+#if defined(RTC_ENABLE_H265)
+#import "RTCH265ProfileLevelId.h"  // nogncheck
+#import "RTCVideoEncoderH265.h"  // nogncheck
+#endif
+
 @implementation RTC_OBJC_TYPE (RTCDefaultVideoEncoderFactory)
 
 @synthesize preferredCodec;
@@ -41,6 +46,12 @@
 
   [result
       addObjectsFromArray:[RTC_OBJC_TYPE(RTCVideoEncoderVP9) supportedCodecs]];
+
+#if defined(RTC_ENABLE_H265)
+  // Empty unless there is a hardware H265 encoder.
+  [result
+      addObjectsFromArray:[RTC_OBJC_TYPE(RTCVideoEncoderH265) supportedCodecs]];
+#endif
 
 #if defined(RTC_USE_LIBAOM_AV1_ENCODER)
   [result
@@ -60,6 +71,13 @@
              [RTC_OBJC_TYPE(RTCVideoEncoderVP9) isSupported]) {
     return [RTC_OBJC_TYPE(RTCVideoEncoderVP9) vp9Encoder];
   }
+
+#if defined(RTC_ENABLE_H265)
+  if ([info.name isEqualToString:kRTCVideoCodecH265Name] &&
+      [RTC_OBJC_TYPE(RTCVideoEncoderH265) isSupported]) {
+    return [[RTC_OBJC_TYPE(RTCVideoEncoderH265) alloc] initWithCodecInfo:info];
+  }
+#endif
 
 #if defined(RTC_USE_LIBAOM_AV1_ENCODER)
   if ([info.name isEqualToString:kRTCVideoCodecAv1Name]) {

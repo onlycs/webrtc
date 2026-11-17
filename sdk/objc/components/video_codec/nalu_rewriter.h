@@ -50,6 +50,34 @@ bool H264AnnexBBufferToCMSampleBuffer(std::span<const uint8_t> annexb_buffer,
 CMVideoFormatDescriptionRef CreateVideoFormatDescription(
     std::span<const uint8_t> annexb_buffer);
 
+#ifdef RTC_ENABLE_H265
+// Converts a sample buffer emitted from the VideoToolbox HEVC encoder into a
+// buffer suitable for RTP. The sample buffer is in hvcc format whereas the rtp
+// buffer needs to be in Annex B format. Data is written directly to
+// `annexb_buffer`. If `is_keyframe` is true, the VPS, SPS and PPS from the
+// sample buffer's format description are placed at the front of the buffer.
+bool H265CMSampleBufferToAnnexBBuffer(CMSampleBufferRef hvcc_sample_buffer,
+                                      bool is_keyframe,
+                                      webrtc::Buffer* annexb_buffer);
+
+// Converts a buffer received from RTP into a sample buffer suitable for the
+// VideoToolbox HEVC decoder. The RTP buffer is in annex b format whereas the
+// sample buffer is in hvcc format. Parameter sets (VPS, SPS and PPS) are not
+// copied into the sample buffer, since they are carried by `video_format`,
+// which must be provided.
+// Caller is responsible for releasing the created sample buffer.
+bool H265AnnexBBufferToCMSampleBuffer(std::span<const uint8_t> annexb_buffer,
+                                      CMVideoFormatDescriptionRef video_format,
+                                      CMSampleBufferRef* out_sample_buffer,
+                                      CMMemoryPoolRef memory_pool);
+
+// Returns a video format description created from the vps/sps/pps information
+// in the Annex B buffer. If there is no such information, nullptr is returned.
+// The caller is responsible for releasing the description.
+CMVideoFormatDescriptionRef CreateH265VideoFormatDescription(
+    std::span<const uint8_t> annexb_buffer);
+#endif  // RTC_ENABLE_H265
+
 // Helper class for reading NALUs from an RTP Annex B buffer.
 class AnnexBBufferReader final {
  public:
